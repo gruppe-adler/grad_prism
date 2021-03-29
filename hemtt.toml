@@ -1,0 +1,28 @@
+name = "grad_intercept_template"
+prefix = "grad_intercept_template"
+author = "Gruppe Adler"
+folder_optionals = false
+files = [
+    "mod.cpp",
+    "Adler.paa",
+    "LICENSE",
+    "README.md"
+]
+
+key_name = "{{prefix}}-{{version}}"
+authority = "{{version}}"
+
+releasebuild = [
+  "!copyInterceptPlugin"
+]
+
+[scripts.copyInterceptPlugin]
+steps_linux = [
+    "mkdir -p releases/{{version}}/@{{prefix}}/intercept",
+    "cp build/lib64/* releases/{{version}}/@{{prefix}}/intercept"
+]
+steps_windows = [
+    'xcopy build\lib64\* releases\\{{version}}\@{{prefix}}\intercept\ /Y /F'
+]
+
+show_output = true

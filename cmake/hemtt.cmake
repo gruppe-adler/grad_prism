@@ -1,0 +1,8 @@
+find_program(HEMTT "hemtt")
+if(HEMTT)
+    message("Found hemtt!")
+    execute_process(COMMAND HEMTT build --release --force-release WORKING_DIRECTORY ${SRC_PATH})
+    execute_process(COMMAND HEMTT zip)
+else()
+    message("Could not find hemtt!")
+endif()

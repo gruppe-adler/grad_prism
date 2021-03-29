@@ -1,0 +1,109 @@
+name: C/C++ CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  job_build_cpp:
+    name: ${{ matrix.os }}-${{ matrix.buildConfig }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        include:
+          - os: windows-latest
+            buildConfig: release
+            displayName: grad_intercept_template_windows
+            triplet: x64-windows-static
+            configuration: 'x64.*'
+            installPath: 'install/bin/'
+          - os: ubuntu-latest
+            buildConfig: release
+            displayName: grad_intercept_template_ubuntu
+            triplet: x64-linux
+            configuration: 'x64.*'
+            installPath: 'install/lib/'
+
+    steps:
+    - name: Use gcc-9/g++-9 on ubuntu
+      run: |
+        echo "CC=gcc-9" >> $GITHUB_ENV
+        echo "CXX=g++-9" >> $GITHUB_ENV
+      shell: bash
+      if: matrix.os == 'ubuntu-latest'
+
+    # Checkout
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+        fetch-depth: 0
+
+    # Install latest CMake
+    - uses: lukka/get-cmake@latest
+
+    # Setup vcpkg and build deps
+    - name: Restore artifacts, or Run vcpkg, build and cache artifacts
+      uses: lukka/run-vcpkg@v5
+      id: runvcpkg
+      with:
+        #setupOnly: true
+        vcpkgDirectory: '${{ github.workspace }}/vcpkg'
+        vcpkgTriplet: '${{ matrix.triplet }}'
+        vcpkgArguments: 'boost-algorithm'
+        vcpkgGitCommitId: 'acb6b10e7fdf5e8519c18398d0b069e1d58ca025'
+
+    # Build with CMake and Ninja
+    - name: Run CMake+Ninja
+      uses: lukka/run-cmake@v3
+      id: runcmake
+      with:
+        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+        cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
+        buildWithCMakeArgs: ' -- install -v'
+        buildDirectory: '${{ runner.workspace }}/b/ninja/'
+        cmakeAppendedArgs: '-G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install'
+        useVcpkgToolchainFile: true
+        buildWithCMake: true
+
+    # Build the mod
+    - uses: gruppe-adler/action-release-with-hemtt@60f7195e5240289fecd07c29cc5ec8fd92ad2159
+      name: 'Build Mod with HEMTT'
+      id: build
+
+    # Upload the mod
+    - uses: actions/upload-artifact@v1
+      with:
+        name: ${{ matrix.displayName }}
+        path: ${{ steps.build.outputs.release_path }}
+
+  job_release:
+    runs-on: windows-latest
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+    needs: [job_build_cpp]
+    steps:
+      # Download the build mod
+      - name: Download windows build
+        uses: actions/download-artifact@v2
+        with:
+          name: grad_intercept_template_windows
+      - name: Download ubuntu build
+        uses: actions/download-artifact@v2
+        with:
+          name: grad_intercept_template_ubuntu
+
+      # zip it
+      - uses: papeloto/action-zip@v1
+        with:
+          files: \@grad_intercept_template/
+          dest: \@grad_intercept_template.zip
+
+      # release it
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: true
+          files: |
+            \@grad_intercept_template.zip
+
