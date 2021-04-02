@@ -51,7 +51,7 @@ jobs:
         #setupOnly: true
         vcpkgDirectory: '${{ github.workspace }}/vcpkg'
         vcpkgTriplet: '${{ matrix.triplet }}'
-        vcpkgArguments: 'prometheus-cpp'
+        vcpkgArguments: 'prometheus-cpp[core,pull]'
         vcpkgGitCommitId: 'acb6b10e7fdf5e8519c18398d0b069e1d58ca025'
 
     # Build with CMake and Ninja
