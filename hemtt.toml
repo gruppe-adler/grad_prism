@@ -1,5 +1,5 @@
-name = "grad_intercept_template"
-prefix = "grad_intercept_template"
+name = "grad_prism"
+prefix = "grad_prism"
 author = "Gruppe Adler"
 folder_optionals = false
 files = [

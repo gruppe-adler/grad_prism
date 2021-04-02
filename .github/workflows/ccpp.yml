@@ -15,13 +15,13 @@ jobs:
         include:
           - os: windows-latest
             buildConfig: release
-            displayName: grad_intercept_template_windows
+            displayName: grad_prism_windows
             triplet: x64-windows-static
             configuration: 'x64.*'
             installPath: 'install/bin/'
           - os: ubuntu-latest
             buildConfig: release
-            displayName: grad_intercept_template_ubuntu
+            displayName: grad_prism_ubuntu
             triplet: x64-linux
             configuration: 'x64.*'
             installPath: 'install/lib/'
@@ -51,7 +51,7 @@ jobs:
         #setupOnly: true
         vcpkgDirectory: '${{ github.workspace }}/vcpkg'
         vcpkgTriplet: '${{ matrix.triplet }}'
-        vcpkgArguments: 'boost-algorithm'
+        vcpkgArguments: 'prometheus-cpp'
         vcpkgGitCommitId: 'acb6b10e7fdf5e8519c18398d0b069e1d58ca025'
 
     # Build with CMake and Ninja
@@ -87,17 +87,17 @@ jobs:
       - name: Download windows build
         uses: actions/download-artifact@v2
         with:
-          name: grad_intercept_template_windows
+          name: grad_prism_windows
       - name: Download ubuntu build
         uses: actions/download-artifact@v2
         with:
-          name: grad_intercept_template_ubuntu
+          name: grad_prism_ubuntu
 
       # zip it
       - uses: papeloto/action-zip@v1
         with:
-          files: \@grad_intercept_template/
-          dest: \@grad_intercept_template.zip
+          files: \@grad_prism/
+          dest: \@grad_prism.zip
 
       # release it
       - uses: "marvinpinto/action-automatic-releases@latest"
@@ -105,5 +105,5 @@ jobs:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: true
           files: |
-            \@grad_intercept_template.zip
+            \@grad_prism.zip
 

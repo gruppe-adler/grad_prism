@@ -21,8 +21,8 @@ ADD_CUSTOM_COMMAND(
             ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/version.cmake)
 
 
-# Boost
-find_path(BOOST_ALGORITHM_INCLUDE_DIRS "boost/algorithm/algorithm.hpp")
+# Prometheus CPP
+find_package(prometheus-cpp CONFIG REQUIRED)
 
 #include the Intercept headers from the submodule
 set(INTERCEPT_CLIENT_PATH "${CMAKE_SOURCE_DIR}/intercept/src/client")
@@ -51,7 +51,7 @@ add_custom_command(TARGET ${INTERCEPT_PLUGIN_NAME} POST_BUILD COMMAND ${CMAKE_CO
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${INTERCEPT_INCLUDE_PATH})
 
-target_include_directories(${INTERCEPT_PLUGIN_NAME} PRIVATE ${BOOST_ALGORITHM_INCLUDE_DIRS})
+target_link_libraries(${INTERCEPT_PLUGIN_NAME} prometheus-cpp::core prometheus-cpp::pull prometheus-cpp::push)
 
 set_target_properties(${INTERCEPT_PLUGIN_NAME} PROPERTIES PREFIX "")
 set_target_properties(${INTERCEPT_PLUGIN_NAME} PROPERTIES FOLDER "${CMAKE_PROJECT_NAME}")

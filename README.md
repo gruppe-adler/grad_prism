@@ -1,7 +1,7 @@
-# Gruppe Adler Intercept Template
+# Gruppe Adler Intercept PRISM
 
-![Build Status](https://github.com/gruppe-adler/grad_intercept_template/workflows/C/C++%20CI/badge.svg?branch=master)
+![Build Status](https://github.com/gruppe-adler/grad_prism/workflows/C/C++%20CI/badge.svg?branch=master)
 
 ---
 
-Gruppe Adler Intercept Template.
+Gruppe Adler Intercept PRISM.
