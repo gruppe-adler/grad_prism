@@ -49,19 +49,26 @@ void intercept::pre_start() {
 
 }
 
+const int32_t portOffset = 5;
+
 bool keepRunning = true;
 
 void intercept::post_init() {
     try {
-        auto port = std::to_string((int32_t)sqf::call(sqf::compile("[] call arma3_reflection_args_fnc_port;")));
+        auto gamePort = (int32_t)sqf::call(sqf::compile("[] call arma3_reflection_args_fnc_port;"));
 
-        if (port.empty() || port == "0") {
-            return;
+        if (gamePort == 0) {
+            gamePort = 2302;
         }
+
+        auto port = gamePort + portOffset;
+
+        prettyDiagLogInfo(std::string("Using game port: ").append(std::to_string(gamePort)));
+        prettyDiagLogInfo(std::string("Using port: ").append(std::to_string(port)));
 
         std::thread exposerThread([port]() {
 
-            pm::Exposer exposer{ std::string("127.0.0.1:").append(port) };
+            pm::Exposer exposer{ std::string("127.0.0.1:").append(std::to_string(port)) };
             auto registry = std::make_shared<pm::Registry>();
 
 
