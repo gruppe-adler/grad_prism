@@ -55,7 +55,7 @@ bool keepRunning = true;
 
 void intercept::post_init() {
     try {
-        auto gamePort = (int32_t)sqf::call(sqf::compile("[] call arma3_reflection_args_fnc_port;"));
+        auto gamePort = (int32_t)sqf::call(sqf::compile("[] call arma3_reflection_commandline_fnc_port;"));
 
         if (gamePort == 0) {
             gamePort = 2302;
