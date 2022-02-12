@@ -20,6 +20,8 @@ ADD_CUSTOM_COMMAND(
     COMMAND ${CMAKE_COMMAND} -DVERSIONFILE_PATH=${CMAKE_CURRENT_SOURCE_DIR}/../addons/main/script_version.hpp -DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}/.. -P
             ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/version.cmake)
 
+# Boost
+find_package(Boost 1.75.0)
 
 # Prometheus CPP
 find_package(prometheus-cpp CONFIG REQUIRED)
@@ -49,6 +51,7 @@ add_library(${INTERCEPT_PLUGIN_NAME} SHARED ${CMAKE_CURRENT_SOURCE_DIR}/../addon
 # HEMTT Build
 add_custom_command(TARGET ${INTERCEPT_PLUGIN_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -DSRC_PATH=${CMAKE_CURRENT_SOURCE_DIR} -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/hemtt.cmake)
 
+include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${INTERCEPT_INCLUDE_PATH})
 
 target_link_libraries(${INTERCEPT_PLUGIN_NAME} prometheus-cpp::core prometheus-cpp::pull)
@@ -63,8 +66,8 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 else()
     set(CMAKE_CXX_FLAGS_DEBUG "/D_DEBUG /MTd /Zi /Ob0 /Od /RTC1 /MP /EHsc")
     set(CMAKE_CXX_FLAGS_RELEASE "/MT /Zi /O2 /Ob1 /EHsc /MP") #with debug info
-    set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} /NODEFAULTLIB:LIBCMT") # LIBCMT conflicts with POCO
-    set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "/OPT:REF /DEBUG:FULL /MANIFEST:NO") 
+    set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} Pdh.lib")
+    set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "/OPT:REF /DEBUG:FULL /MANIFEST:NO Pdh.lib")
 endif()
 
 install(TARGETS ${INTERCEPT_PLUGIN_NAME} RUNTIME DESTINATION bin)
