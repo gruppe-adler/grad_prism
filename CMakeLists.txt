@@ -5,6 +5,12 @@ cmake_minimum_required (VERSION 3.12)
 #This is your project name. And also the filename of the resulting plugin.
 project (grad_prism)
 
+option(PRISM_BENCHMARK_OPT "Benchmark Logging" OFF)
+
+if(PRISM_BENCHMARK_OPT)
+    add_compile_definitions(PRISM_BENCHMARK)
+endif()
+
 #This setting enables the use of the engine string type instead of converting to std::string.
 #Enabling this results in better performance when handling strings to SQF commands.
 option(USE_ENGINE_TYPES "USE_ENGINE_TYPES" OFF)

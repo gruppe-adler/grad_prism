@@ -34,6 +34,18 @@
 #include "prometheus/family.h"
 #include "prometheus/registry.h"
 
+#ifdef PRISM_BENCHMARK
+
+#if WIN32
+#include <Shlobj.h>
+#endif
+
+#include "spdlog/spdlog.h"
+#include "spdlog/async.h"
+#include "spdlog/sinks/basic_file_sink.h"
+#include "spdlog/stopwatch.h"
+#endif
+
 using namespace intercept;
 
 namespace pm = prometheus;
@@ -156,6 +168,11 @@ void arma_loop(
         while (true)
         {
             std::this_thread::sleep_for(std::chrono::seconds(1));
+
+#ifdef PRISM_BENCHMARK
+            spdlog::stopwatch sw;
+#endif
+
             if (keepRunning) {
                 threadLock.lock();
                 avgFps = (float_t)sqf::diag_fps();
@@ -205,6 +222,10 @@ void arma_loop(
 
                 threadLock.unlock();
 
+#ifdef PRISM_BENCHMARK
+                spdlog::info("Spent {} in arma loop (synchronous part)", sw);
+#endif
+
                 if (missionTimeGauge != nullptr) {
                     missionTimeGauge->Set(time);
                 }
@@ -253,6 +274,11 @@ void arma_loop(
 
                 allDeadMenGauge.Set(0);
             }
+
+#ifdef PRISM_BENCHMARK
+            spdlog::info("Spent {} in arma loop (complete part)", sw);
+#endif
+
         }
     }
     catch (const std::exception& ex)
@@ -264,7 +290,7 @@ void arma_loop(
 
 // https://stackoverflow.com/questions/63166/how-to-determine-cpu-and-memory-consumption-from-inside-a-process
 
-bool ressource_loop(
+bool resource_loop(
     prometheus::Gauge& cpuTotalGauge,
     prometheus::Gauge& cpuProcessGauge,
 
@@ -318,6 +344,10 @@ bool ressource_loop(
         while (true)
         {
             std::this_thread::sleep_for(std::chrono::seconds(1));
+
+#ifdef PRISM_BENCHMARK
+            spdlog::stopwatch sw;
+#endif
 
 #ifdef WIN32
             // CPU usage
@@ -377,6 +407,10 @@ bool ressource_loop(
             memPhysProcessGauge.Set(memPhysProc);
 
 #endif // WIN32
+
+#ifdef PRISM_BENCHMARK
+            spdlog::info("Spent {} in resource loop", sw);
+#endif
         }
     }
     catch (const std::exception& ex)
@@ -391,6 +425,30 @@ bool ressource_loop(
 
 
 void intercept::pre_start() {
+
+#ifdef PRISM_BENCHMARK
+#if WIN32
+    std::filesystem::path a3_log_path;
+    PWSTR path_tmp;
+
+    auto get_folder_path_ret = SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr, &path_tmp);
+
+    if (get_folder_path_ret == S_OK) {
+        a3_log_path = path_tmp;
+    }
+    CoTaskMemFree(path_tmp);
+
+    a3_log_path = a3_log_path / "Arma 3";
+
+#endif
+    auto async_file = spdlog::basic_logger_mt<spdlog::async_factory>(
+        "async_file_logger",
+        std::format("{}/grad_prism_benchmark_{}.log", a3_log_path.string(), std::format("{:%Y-%m-%d_%H-%M-%S}", std::chrono::system_clock::now())));
+    spdlog::flush_every(std::chrono::seconds(10));
+    spdlog::set_default_logger(async_file);
+    spdlog::info("grad_prism_benchmark init");
+
+#endif
 
     if (!fs::is_directory("grad_prism")) {
         fs::create_directory("grad_prism");
@@ -519,7 +577,7 @@ void intercept::pre_start() {
             );
             armaLoopThread.detach();
 
-            std::thread ressourceLoopThread(ressource_loop,
+            std::thread ressourceLoopThread(resource_loop,
                 std::ref(cpuTotalGauge), std::ref(cpuProcessGauge),
                 std::ref(memVirtTotalGauge), std::ref(memVirtProcessGauge),
                 std::ref(memPhysTotalGauge), std::ref(memPhysProcessGauge));

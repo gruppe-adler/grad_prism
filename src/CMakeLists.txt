@@ -26,6 +26,11 @@ find_package(Boost 1.75.0)
 # Prometheus CPP
 find_package(prometheus-cpp CONFIG REQUIRED)
 
+# Quill
+if(PRISM_BENCHMARK_OPT)
+    find_package(spdlog CONFIG REQUIRED)
+endif()
+
 #include the Intercept headers from the submodule
 set(INTERCEPT_CLIENT_PATH "${CMAKE_SOURCE_DIR}/intercept/src/client")
 
@@ -55,6 +60,10 @@ include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${INTERCEPT_INCLUDE_PATH})
 
 target_link_libraries(${INTERCEPT_PLUGIN_NAME} prometheus-cpp::core prometheus-cpp::pull)
+
+if(PRISM_BENCHMARK_OPT)
+    target_link_libraries(${INTERCEPT_PLUGIN_NAME} spdlog::spdlog)
+endif()
 
 set_target_properties(${INTERCEPT_PLUGIN_NAME} PROPERTIES PREFIX "")
 set_target_properties(${INTERCEPT_PLUGIN_NAME} PROPERTIES FOLDER "${CMAKE_PROJECT_NAME}")

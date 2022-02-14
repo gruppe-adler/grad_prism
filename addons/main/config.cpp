@@ -6,7 +6,9 @@ class CfgPatches {
         units[] = {};
         weapons[] = {};
         requiredVersion = 1.92;
-        requiredAddons[] = {"intercept_core"};
+        requiredAddons[] = {
+            "intercept_core"
+        };
         authors[] = { "Willard" };
         url = "https://github.com/gruppe-adler/grad_prism";
         VERSION_CONFIG;
