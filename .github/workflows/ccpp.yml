@@ -11,15 +11,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [windows-2022, ubuntu-22.04]
         include:
-          - os: windows-latest
+          - os: windows-2022
             buildConfig: release
             displayName: grad_prism_windows
             triplet: x64-windows-static
             configuration: 'x64.*'
             installPath: 'install/bin/'
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             buildConfig: release
             displayName: grad_prism_ubuntu
             triplet: x64-linux
@@ -27,12 +27,6 @@ jobs:
             installPath: 'install/lib/'
 
     steps:
-    - name: Use gcc-9/g++-9 on ubuntu
-      run: |
-        echo "CC=gcc-9" >> $GITHUB_ENV
-        echo "CXX=g++-9" >> $GITHUB_ENV
-      shell: bash
-      if: matrix.os == 'ubuntu-latest'
 
     # Checkout
     - uses: actions/checkout@v2
@@ -51,8 +45,8 @@ jobs:
         #setupOnly: true
         vcpkgDirectory: '${{ github.workspace }}/vcpkg'
         vcpkgTriplet: '${{ matrix.triplet }}'
-        vcpkgArguments: 'prometheus-cpp boost-algorithm boost-property-tree'
-        vcpkgGitCommitId: 'acb6b10e7fdf5e8519c18398d0b069e1d58ca025'
+        vcpkgArguments: 'prometheus-cpp boost-algorithm boost-property-tree fmt'
+        vcpkgGitCommitId: '93b38546e271ac8047a6dd00469f14845beb4642'
 
     # Build with CMake and Ninja
     - name: Run CMake+Ninja
@@ -106,4 +100,3 @@ jobs:
           prerelease: true
           files: |
             \@grad_prism.zip
-

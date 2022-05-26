@@ -23,6 +23,8 @@ ADD_CUSTOM_COMMAND(
 # Boost
 find_package(Boost 1.75.0)
 
+find_package(fmt)
+
 # Prometheus CPP
 find_package(prometheus-cpp CONFIG REQUIRED)
 
@@ -59,6 +61,8 @@ add_custom_command(TARGET ${INTERCEPT_PLUGIN_NAME} POST_BUILD COMMAND ${CMAKE_CO
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${INTERCEPT_INCLUDE_PATH})
 
+target_link_libraries(${INTERCEPT_PLUGIN_NAME} fmt::fmt)
+
 target_link_libraries(${INTERCEPT_PLUGIN_NAME} prometheus-cpp::core prometheus-cpp::pull)
 
 if(PRISM_BENCHMARK_OPT)
@@ -76,7 +80,7 @@ else()
     set(CMAKE_CXX_FLAGS_DEBUG "/D_DEBUG /MTd /Zi /Ob0 /Od /RTC1 /MP /EHsc")
     set(CMAKE_CXX_FLAGS_RELEASE "/MT /Zi /O2 /Ob1 /EHsc /MP") #with debug info
     set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} Pdh.lib")
-    set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "/OPT:REF /DEBUG:FULL /MANIFEST:NO Pdh.lib")
+    set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "/NODEFAULTLIB:library /OPT:REF /DEBUG:FULL /MANIFEST:NO Pdh.lib")
 endif()
 
 install(TARGETS ${INTERCEPT_PLUGIN_NAME} RUNTIME DESTINATION bin)
