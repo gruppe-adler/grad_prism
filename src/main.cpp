@@ -16,7 +16,7 @@
 #include <algorithm>
 #include <iostream>
 #include <filesystem>
-#include <format>
+#include <fmt/format.h>
 #include <iostream>
 #include <string>
 #include <string_view>
@@ -443,7 +443,7 @@ void intercept::pre_start() {
 #endif
     auto async_file = spdlog::basic_logger_mt<spdlog::async_factory>(
         "async_file_logger",
-        std::format("{}/grad_prism_benchmark_{}.log", a3_log_path.string(), std::format("{:%Y-%m-%d_%H-%M-%S}", std::chrono::system_clock::now())));
+        fmt::format("{}/grad_prism_benchmark_{:%Y-%m-%d_%H-%M-%S}.log", a3_log_path.string(), std::chrono::system_clock::now()));
     spdlog::flush_every(std::chrono::seconds(10));
     spdlog::set_default_logger(async_file);
     spdlog::info("grad_prism_benchmark init");
@@ -489,8 +489,8 @@ void intercept::pre_start() {
 
             auto civetConfig = std::vector<std::string>{
                 "listening_ports",  std::to_string(port),
-                "error_log_file", std::format("grad_prism/logs/error_{}.log", port),
-                "access_log_file", std::format("grad_prism/logs/access_{}.log", port),
+                "error_log_file", fmt::format("grad_prism/logs/error_{}.log", port),
+                "access_log_file", fmt::format("grad_prism/logs/access_{}.log", port),
                 /*"ssl_certificate", "/path/to/ssl_cert.pem",
                 "ssl_ca_file", "/path/to/calist.pem",
                 "ssl_verify_peer", "yes",*/
